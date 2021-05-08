@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <div class="container">
+        <div id="lblHeader">Hello</div>
+        <div id="griddata"></div>
+    </div>
+</div>
+
+@section scripts {
+
+    <script>
+        $(document).ready(function () {
+            getRequest();
+            setInterval(function () {
+                getRequest();
+            }, 7000);
+        });
+    </script>
+}

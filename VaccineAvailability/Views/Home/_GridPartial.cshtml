@@ -1,0 +1,24 @@
+﻿@model Root
+<table class="table table-responsive">
+    <thead>
+        <tr>
+            <th>Address</th>
+            <th>Pin</th>
+            <th>Age</th>
+            <th>Availability</th>
+            <th>Type</th>
+            <th>Vaccine</th>
+        </tr>
+    </thead>
+    @foreach (var item in Model.centers.Where(x => x.sessions.Count> 1 && x.sessions[1].min_age_limit <= 20 && x.sessions[1].available_capacity > 0))
+    {
+<tr>
+    <td> @item.name @item.address </td>
+    <td> @item.pincode</td>
+    <td> @item.sessions[0].min_age_limit</td>
+    <td> @item.sessions[0].available_capacity</td>
+    <td> @item.fee_type</td>
+    <td> @item.sessions[0].vaccine</td>
+</tr>
+    }
+</table>
