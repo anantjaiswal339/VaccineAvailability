@@ -11,16 +11,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using VaccineAvailability.Models;
+using VaccineAvailability.Models.Data;
+using AvailableCenter = VaccineAvailability.Models.AvailableCenter;
 
 namespace VaccineAvailability.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private VaccineAvailabilityDBContext _dbContext = new VaccineAvailabilityDBContext();
 
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
+            //_dbContext = dbContext;
         }
 
         public IActionResult Index()
@@ -62,7 +66,7 @@ namespace VaccineAvailability.Controllers
             var data = JsonConvert.DeserializeObject<Root>(response.Content);
 
             string fileData = "";
-            var listData = data.centers.Where(x => x.sessions.Count >1 &&  x.sessions[1].min_age_limit <= 20 && x.sessions[1].available_capacity > 0)
+            var listData = data.centers.Where(x => x.sessions.Count >1 &&  x.sessions[1].min_age_limit >= 45 && x.sessions[1].available_capacity > 0)
                 .Select(x => new AvailableCenter
                 {
                     Address = x.address,
@@ -77,22 +81,38 @@ namespace VaccineAvailability.Controllers
                     State = x.state_name
 
                 });
+            foreach (var item in listData)
+            {
+                VaccineAvailability.Models.Data.AvailableCenter availableCenter = new Models.Data.AvailableCenter();
+                availableCenter.Address = item.Address;
+                availableCenter.Pincode = item.PinCode;
+                availableCenter.AvailableVaccines = item.AvailableVaccines;
+                availableCenter.CurrentDateTime = DateTime.Now;
+                availableCenter.Date = Convert.ToDateTime(item.Date);
+                availableCenter.District = item.District;
+                availableCenter.Id = item.Id;
+                availableCenter.MinimumAge = item.MinimumAge;
+                availableCenter.Name = item.Name;
+                availableCenter.State = item.State;
+                _dbContext.AvailableCenter.Add(availableCenter);
+            }
+            //var result = _dbContext.AvailableCenter.Add(listData);
 
             //using (var mem = new MemoryStream())
-            using (var writer = new StreamWriter("E:\\PROJECT\\VaccineAvailability\\vaccine_availability.csv"))
-            using (var csvWriter = new CsvWriter(writer))
-            {
-                //csvWriter.Configuration.Delimiter = ";";
-                csvWriter.Configuration.HasHeaderRecord = true;
-                csvWriter.Configuration.AutoMap<AvailableCenter>();
+            //using (var writer = new StreamWriter("E:\\VaccineAvailability\\VaccineAvailability\\vaccine_availability.csv"))
+            //using (var csvWriter = new CsvWriter(writer))
+            //{
+            //    //csvWriter.Configuration.Delimiter = ";";
+            //    csvWriter.Configuration.HasHeaderRecord = true;
+            //    csvWriter.Configuration.AutoMap<AvailableCenter>();
 
-                csvWriter.WriteHeader<AvailableCenter>();
-                csvWriter.WriteRecords(listData);
+            //    csvWriter.WriteHeader<AvailableCenter>();
+            //    csvWriter.WriteRecords(listData);
 
                 
-                writer.Flush();
-                //return File(mem.ToArray(), "text/csv", "E:\\PROJECT\\VaccineAvailability\\vaccine_availability.csv");
-            }
+            //    writer.Flush();
+            //    //return File(mem.ToArray(), "text/csv", "E:\\PROJECT\\VaccineAvailability\\vaccine_availability.csv");
+            //}
 
             //foreach (var center in data.centers)
             //{
